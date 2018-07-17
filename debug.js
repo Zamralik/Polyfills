@@ -1,3 +1,4 @@
+"use strict";
 function publish(root, name, module)
 {
 	Object.defineProperty(root, name, { value : module });
