@@ -700,5 +700,3 @@ document.addEventListener(
 		);
 	}
 );
-/* ******************************************************** */
-module.exports = undefined;
