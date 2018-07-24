@@ -322,6 +322,22 @@ if (window.EventTarget === undefined)
 	window.EventTarget = Node;
 }
 /* ******************************************************** */
+if (NodeList.prototype.forEach === undefined)
+{
+	publish(
+		NodeList.prototype,
+		"forEach",
+		function (callback, anchor)
+		{
+			let i = 0;
+			for (; i < this.length; ++i)
+			{
+				callback.call(anchor, this[i], i, this);
+			}
+		}
+	);
+}
+/* ******************************************************** */
 if (window.RadioNodeList === undefined)
 {
 	window.RadioNodeList = HTMLCollection;
