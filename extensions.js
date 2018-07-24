@@ -626,5 +626,11 @@ document.addEventListener(
 				form.reset();
 			}
 		);
+		document.querySelectorAll("select:not([multiple]):not(:checked)").forEach(
+			function (select)
+			{
+				select.selectedIndex = 0;
+			}
+		);
 	}
 );
