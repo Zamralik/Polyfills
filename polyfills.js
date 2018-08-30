@@ -1020,7 +1020,7 @@ if (window.WeakSet === undefined)
 	if (!(template.content instanceof DocumentFragment))
 	{
 		Object.defineProperty(
-			template.__proto__,
+			Object.getPrototypeOf(template),
 			"content",
 			{
 				get: function ()
