@@ -342,10 +342,12 @@ if (Object.assign === undefined)
 				{
 					if (names.includes(key))
 					{
-						target[names[j]] = argv[i][names[j]];
+						target[key] = argv[i][key];
 					}
 				}
 			}
+
+			return target;
 		}
 	);
 }
