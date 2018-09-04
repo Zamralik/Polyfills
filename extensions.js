@@ -629,7 +629,14 @@ document.addEventListener(
 		document.querySelectorAll("select:not([multiple]):not(:checked)").forEach(
 			function (select)
 			{
-				select.selectedIndex = 0;
+				select.selectedIndex = Array.prototype.reduce.call(
+					select.options,
+					function (selected_index, option)
+					{
+						return option.defaultSelected ? option.index : selected_index;
+					},
+					0
+				);
 			}
 		);
 	}
