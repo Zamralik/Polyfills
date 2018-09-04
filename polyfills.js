@@ -330,18 +330,20 @@ if (Object.assign === undefined)
 		function (target)
 		{
 			let i = 1;
+			let key;
 			const argv = arguments;
 			const argc = argv.length;
 
 			for (; i < argc; ++i)
 			{
 				let names = Object.getOwnPropertyNames(argv[i]);
-				const length = names.length;
-				let j = 0;
 
-				for (; j < length; ++j)
+				for (key in argv[i])
 				{
-					target[names[j]] = argv[i][names[j]];
+					if (names.includes(key))
+					{
+						target[names[j]] = argv[i][names[j]];
+					}
 				}
 			}
 		}
