@@ -322,6 +322,32 @@ if (window.EventTarget === undefined)
 	window.EventTarget = Node;
 }
 /* ******************************************************** */
+if (Object.assign === undefined)
+{
+	publish(
+		Object,
+		"assign",
+		function (target)
+		{
+			let i = 1;
+			const argv = arguments;
+			const argc = argv.length;
+
+			for (; i < argc; ++i)
+			{
+				let names = Object.getOwnPropertyNames(argv[i]);
+				const length = names.length;
+				let j = 0;
+
+				for (; j < length; ++j)
+				{
+					target[names[j]] = argv[i][names[j]];
+				}
+			}
+		}
+	);
+}
+/* ******************************************************** */
 if (NodeList.prototype.forEach === undefined)
 {
 	publish(
