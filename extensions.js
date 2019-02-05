@@ -37,6 +37,14 @@ navigator.geolocation.askCurrentPosition = function(options)
 };
 /* ******************************************************** */
 publish(
+	Number,
+	"isFloat",
+	function (mixed)
+	{
+		return (typeof mixed === "number") && !Number.isNaN(mixed);
+	}
+);
+publish(
 	Number.prototype,
 	"sign",
 	function ()
