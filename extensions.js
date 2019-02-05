@@ -37,34 +37,34 @@ navigator.geolocation.askCurrentPosition = function(options)
 };
 /* ******************************************************** */
 window.TypeCheck = {
-	isObject: function(mixed)
+	isObject: function(value)
 	{
-		return (typeof mixed === "object");
+		return (typeof value === "object");
 	},
-	isFunction: function(mixed)
+	isFunction: function(value)
 	{
-		return (typeof mixed === "function");
+		return (typeof value === "function");
 	},
-	isBoolean: function(mixed)
+	isBoolean: function(value)
 	{
-		return (typeof mixed === "boolean");
+		return (typeof value === "boolean");
 	},
-	isString: function(mixed)
+	isString: function(value)
 	{
-		return (typeof mixed === "string");
+		return (typeof value === "string");
 	},
-	isNumber: function(mixed)
+	isNumber: function(value)
 	{
-		return (typeof mixed === "number");
+		return (typeof value === "number");
 	}
 };
 /* ******************************************************** */
 publish(
 	Number,
 	"isFloat",
-	function (mixed)
+	function (value)
 	{
-		return (typeof mixed === "number") && !Number.isNaN(mixed);
+		return (typeof value === "number") && !Number.isNaN(value);
 	}
 );
 publish(
