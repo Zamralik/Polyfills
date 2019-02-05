@@ -36,6 +36,29 @@ navigator.geolocation.askCurrentPosition = function(options)
 	);
 };
 /* ******************************************************** */
+window.TypeCheck = {
+	isObject: function(mixed)
+	{
+		return (typeof mixed === "object");
+	},
+	isFunction: function(mixed)
+	{
+		return (typeof mixed === "function");
+	},
+	isBoolean: function(mixed)
+	{
+		return (typeof mixed === "boolean");
+	},
+	isString: function(mixed)
+	{
+		return (typeof mixed === "string");
+	},
+	isNumber: function(mixed)
+	{
+		return (typeof mixed === "number");
+	}
+};
+/* ******************************************************** */
 publish(
 	Number,
 	"isFloat",
