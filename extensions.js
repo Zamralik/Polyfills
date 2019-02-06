@@ -1,14 +1,22 @@
 "use strict";
 function publish(root, name, module)
 {
-	Object.defineProperty(root, name, { value : module });
+	Object.defineProperty(root, name, { value: module });
 };
 /* ******************************************************** */
 /*		EXTENSIONS											*/
 /* ******************************************************** */
-Function.NO_OP = function () {};
+Function.NO_OP = function () { };
 /* ******************************************************** */
 document.html = document.head.parentNode;
+/* ******************************************************** */
+window.assert = function (test_result, error_message)
+{
+	if (!test_result)
+	{
+		throw new Error(error_message || "Assertion failed");
+	}
+};
 /* ******************************************************** */
 window.timeout = function (delay)
 {
@@ -26,7 +34,7 @@ window.timeout = function (delay)
 	return promise;
 };
 /* ******************************************************** */
-navigator.geolocation.askCurrentPosition = function(options)
+navigator.geolocation.askCurrentPosition = function (options)
 {
 	return new Promise(
 		function (accept, reject)
@@ -37,23 +45,27 @@ navigator.geolocation.askCurrentPosition = function(options)
 };
 /* ******************************************************** */
 window.TypeCheck = {
-	isObject: function(value)
+	isDefined: function (value)
 	{
-		return (typeof value === "object");
+		return (value !== undefined && value !== null);
 	},
-	isFunction: function(value)
+	isObject: function (value)
+	{
+		return (value !== null) && (typeof value === "object");
+	},
+	isFunction: function (value)
 	{
 		return (typeof value === "function");
 	},
-	isBoolean: function(value)
+	isBoolean: function (value)
 	{
 		return (typeof value === "boolean");
 	},
-	isString: function(value)
+	isString: function (value)
 	{
 		return (typeof value === "string");
 	},
-	isNumber: function(value)
+	isNumber: function (value)
 	{
 		return (typeof value === "number");
 	}
@@ -282,11 +294,11 @@ publish(
 		return this.then(
 			function (answer)
 			{
-				return { error : false, detail : answer };
+				return { error: false, detail: answer };
 			},
 			function (reason)
 			{
-				return { error : true, reason : reason };
+				return { error: true, reason: reason };
 			}
 		);
 	}
@@ -385,7 +397,7 @@ Node.getCommonAncestor = function (node1, node2)
 		return Array.from(this);
 	}
 	publish(HTMLCollection.prototype, "wrap", wrap);
-	publish(      NodeList.prototype, "wrap", wrap);
+	publish(NodeList.prototype, "wrap", wrap);
 }
 {
 	function extract()
@@ -400,7 +412,7 @@ Node.getCommonAncestor = function (node1, node2)
 		return fragment;
 	}
 	publish(HTMLCollection.prototype, "extract", extract);
-	publish(      NodeList.prototype, "extract", extract);
+	publish(NodeList.prototype, "extract", extract);
 }
 {
 	function removeAll()
@@ -413,7 +425,7 @@ Node.getCommonAncestor = function (node1, node2)
 		}
 	}
 	publish(HTMLCollection.prototype, "removeAll", removeAll);
-	publish(      NodeList.prototype, "removeAll", removeAll);
+	publish(NodeList.prototype, "removeAll", removeAll);
 }
 /* ******************************************************** */
 publish(
@@ -421,7 +433,7 @@ publish(
 	"dispatchCustomEvent",
 	function (name, data)
 	{
-		this.dispatchEvent(new CustomEvent(name, { bubbles : true, cancelable : true, detail : data }));
+		this.dispatchEvent(new CustomEvent(name, { bubbles: true, cancelable: true, detail: data }));
 	}
 );
 /* ******************************************************** */
@@ -483,13 +495,13 @@ window.Iterator = {
 					const value = iterable[index];
 					++index;
 					return {
-						done  : false,
-						value : value
+						done: false,
+						value: value
 					};
 				}
 				else
 				{
-					return { done : true };
+					return { done: true };
 				}
 			}
 		};
@@ -632,7 +644,7 @@ Object.defineProperty(
 	document.location.constructor.prototype,
 	"parameters",
 	{
-		get: function()
+		get: function ()
 		{
 			return this.search.substr(1).split("&").reduce(
 				function (stack, pair)
