@@ -1,7 +1,7 @@
 "use strict";
 function publish(root, name, module)
 {
-	Object.defineProperty(root, name, { value : module });
+	Object.defineProperty(root, name, { value: module });
 };
 /* ******************************************************** */
 /*		POLYFILLS											*/
@@ -11,7 +11,7 @@ function publish(root, name, module)
 if (window.Promise === undefined)
 {
 	// States constants
-	const PENDING  = undefined;
+	const PENDING = undefined;
 	const REJECTED = false;
 	const ACCEPTED = true;
 	// Used internally as resolver
@@ -95,7 +95,7 @@ if (window.Promise === undefined)
 					copy();
 				}
 			}
-				// Is there a chance that the promise was resolved with an ersatz of promise ?
+			// Is there a chance that the promise was resolved with an ersatz of promise ?
 			else if (value && (typeof value === "object" || typeof value === "function"))
 			{
 				// We make a copy of the current level
@@ -420,18 +420,18 @@ if (Array.prototype.keys === undefined)
 		function ()
 		{
 			const length = this.length;
-			let index  = -1;
+			let index = -1;
 			return {
 				next: function ()
 				{
 					++index;
 					if (index < length)
 					{
-						return { done : false, value : index };
+						return { done: false, value: index };
 					}
 					else
 					{
-						return { done : true };
+						return { done: true };
 					}
 				}
 			};
@@ -445,7 +445,7 @@ if (Array.prototype.values === undefined)
 		"values",
 		function ()
 		{
-			const copy   = Array.from(this);
+			const copy = Array.from(this);
 			const length = this.length;
 			let index = -1;
 			return {
@@ -454,11 +454,11 @@ if (Array.prototype.values === undefined)
 					++index;
 					if (index < length)
 					{
-						return { done : false, value : copy[index] };
+						return { done: false, value: copy[index] };
 					}
 					else
 					{
-						return { done : true };
+						return { done: true };
 					}
 				}
 			};
@@ -472,7 +472,7 @@ if (Array.prototype.entries === undefined)
 		"entries",
 		function ()
 		{
-			const copy   = Array.from(this);
+			const copy = Array.from(this);
 			const length = this.length;
 			let index = -1;
 			return {
@@ -481,11 +481,11 @@ if (Array.prototype.entries === undefined)
 					++index;
 					if (index < length)
 					{
-						return { done : false, value : [index, copy[index]] };
+						return { done: false, value: [index, copy[index]] };
 					}
 					else
 					{
-						return { done : true };
+						return { done: true };
 					}
 				}
 			};
@@ -612,7 +612,7 @@ if (Node.prototype.replaceWith === undefined)
 			"checkValidity",
 			function ()
 			{
-				return this.querySelectorAll("[required]:not([disabled]):not([readonly])").wrap().every(
+				return Array.from(this.querySelectorAll("[required]:not([disabled]):not([readonly])")).every(
 					function (node)
 					{
 						return node.closest("fieldset[disabled]") || field.checkValidity();
@@ -697,9 +697,9 @@ if (typeof window.CustomEvent !== "function")
 		const mimic = document.createEvent("CustomEvent");
 		mimic.initCustomEvent(
 			event,
-			params && params.bubbles	&& true,
-			params && params.cancelable	&& true,
-			params && params.detail		|| undefined
+			params && params.bubbles && true,
+			params && params.cancelable && true,
+			params && params.detail || undefined
 		);
 		return mimic;
 	};
@@ -759,8 +759,8 @@ if (window.Map === undefined)
 {
 	window.Map = function (iterable)
 	{
-		Object.defineProperty(this, "_keys",   { value : [] });
-		Object.defineProperty(this, "_values", { value : [] });
+		Object.defineProperty(this, "_keys", { value: [] });
+		Object.defineProperty(this, "_values", { value: [] });
 		if (Iterator.isIterable(iterable))
 		{
 			Iterator.toArray(iterable).forEach(this.set, this);
@@ -857,7 +857,7 @@ if (window.Set === undefined)
 {
 	window.Set = function (iterable)
 	{
-		Object.defineProperty(this, "_values", { value : [] });
+		Object.defineProperty(this, "_values", { value: [] });
 		if (Iterator.isIterable(iterable))
 		{
 			Iterator.toArray(iterable).forEach(this.add, this);
@@ -944,13 +944,13 @@ if (window.WeakMap === undefined)
 	window.WeakMap = function (iterable)
 	{
 		++WeakMap.index;
-		Object.defineProperty(this, "_ref", "_weakmap_polyfill_"+WeakMap.index);
+		Object.defineProperty(this, "_ref", "_weakmap_polyfill_" + WeakMap.index);
 		if (Iterator.isIterable(iterable))
 		{
 			Iterator.toArray(iterable).forEach(this.set, this);
 		}
 	};
-	Object.defineProperty(WeakMap, "index", { writable : true, value : 0 });
+	Object.defineProperty(WeakMap, "index", { writable: true, value: 0 });
 	WeakMap.prototype = {
 		"set": function (key, value)
 		{
@@ -999,13 +999,13 @@ if (window.WeakSet === undefined)
 	window.WeakSet = function (iterable)
 	{
 		++WeakSet.index;
-		Object.defineProperty(this, "_ref", "_weakset_polyfill_"+WeakSet.index);
+		Object.defineProperty(this, "_ref", "_weakset_polyfill_" + WeakSet.index);
 		if (Iterator.isIterable(iterable))
 		{
 			Iterator.toArray(iterable).forEach(this.add, this);
 		}
 	};
-	Object.defineProperty(WeakSet, "index", { writable : true, value : 0 });
+	Object.defineProperty(WeakSet, "index", { writable: true, value: 0 });
 	WeakSet.prototype = {
 		"add": function (value)
 		{

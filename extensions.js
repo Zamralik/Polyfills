@@ -392,29 +392,6 @@ Node.getCommonAncestor = function (node1, node2)
 };
 /* ******************************************************** */
 {
-	function wrap()
-	{
-		return Array.from(this);
-	}
-	publish(HTMLCollection.prototype, "wrap", wrap);
-	publish(NodeList.prototype, "wrap", wrap);
-}
-{
-	function extract()
-	{
-		const fragment = document.createDocumentFragment();
-		const length = this.length;
-		let i = 0;
-		for (; i < length; ++i)
-		{
-			fragment.appendChild(this[0]);
-		}
-		return fragment;
-	}
-	publish(HTMLCollection.prototype, "extract", extract);
-	publish(NodeList.prototype, "extract", extract);
-}
-{
 	function removeAll()
 	{
 		const length = this.length;
@@ -426,6 +403,31 @@ Node.getCommonAncestor = function (node1, node2)
 	}
 	publish(HTMLCollection.prototype, "removeAll", removeAll);
 	publish(NodeList.prototype, "removeAll", removeAll);
+}
+{
+	function toFragment(clone_nodes)
+	{
+		const fragment = document.createDocumentFragment();
+		const length = this.length;
+		let i = 0;
+		if (clone_nodes)
+		{
+			for (; i < length; ++i)
+			{
+				fragment.appendChild(this[i].cloneNode(true));
+			}
+		}
+		else
+		{
+			for (; i < length; ++i)
+			{
+				fragment.appendChild(this[0]);
+			}
+		}
+		return fragment;
+	}
+	publish(HTMLCollection.prototype, "toFragment", toFragment);
+	publish(NodeList.prototype, "toFragment", toFragment);
 }
 /* ******************************************************** */
 publish(
@@ -523,7 +525,7 @@ window.Iterator = {
 		"getFieldNames",
 		function ()
 		{
-			return this.querySelectorAll("input[name], select[name], textarea[name]").wrap().reduce(aggregator, []);
+			return Array.from(this.querySelectorAll("input[name], select[name], textarea[name]")).reduce(aggregator, []);
 		}
 	);
 }
@@ -550,7 +552,7 @@ window.Iterator = {
 		{
 			if (this[0].type === "checkbox")
 			{
-				return field.wrap().reduce(
+				return Array.from(field).reduce(
 					function (stack, input)
 					{
 						if (input.checked)
@@ -581,7 +583,7 @@ window.Iterator = {
 			switch (field.type)
 			{
 				case "select-multiple":
-					return field.options.wrap().reduce(
+					return Array.from(field.options).reduce(
 						function (stack, option)
 						{
 							if (option.selected)
@@ -663,7 +665,7 @@ document.addEventListener(
 	"DOMContentLoaded",
 	function ()
 	{
-		document.querySelectorAll("form").wrap().forEach(
+		Array.from(document.querySelectorAll("form")).forEach(
 			function (form)
 			{
 				form.reset();
