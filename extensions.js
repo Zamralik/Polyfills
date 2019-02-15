@@ -34,6 +34,69 @@ window.timeout = function (delay)
 	return promise;
 };
 /* ******************************************************** */
+window.scrollSmoothlyTo = function (x, y)
+{
+	const hasNativeSmoothScroll = (
+		window.InstallTrigger !== undefined
+		||
+		(window.chrome && (window.chrome.webstore || window.chrome.runtime))
+	);
+	if (Element.prototype.scrollIntoView && hasNativeSmoothScroll)
+	{
+		let pixel = document.querySelector("scroll-pixel");
+		if (!pixel)
+		{
+			pixel = document.createElement("scroll-pixel");
+			pixel.style.pointerEvents = "none";
+			pixel.style.opacity = "0";
+			pixel.style.display = "block";
+			pixel.style.width = "1px";
+			pixel.style.height = "1px";
+			pixel.style.position = "absolute";
+			document.body.appendChild(pixel);
+		}
+		pixel.style.left = x + "px";
+		pixel.style.top = y + "px";
+		pixel.scrollIntoView({
+			behavior: "smooth",
+			block: "start",
+			inline: "start"
+		});
+		return;
+	}
+
+	const t0 = Date.now();
+	const x0 = window.scrollX;
+	const y0 = window.scrollY;
+
+	function next()
+	{
+		const t = Date.now() - t0;
+
+		if (t < 300)
+		{
+			const p = t / 300;
+
+			window.scrollTo(
+				(x - x0) * p + x0,
+				(y - y0) * p + y0
+			);
+
+			requestAnimationFrame(next);
+		}
+		else
+		{
+			window.scrollTo(x, y);
+		}
+	}
+
+	requestAnimationFrame(next);
+};
+window.scrollSmoothlyBy = function (dx, dy)
+{
+	scrollSmoothlyTo(window.scrollX + dx, window.scrollY + dy);
+};
+/* ******************************************************** */
 navigator.geolocation.askCurrentPosition = function (options)
 {
 	return new Promise(
