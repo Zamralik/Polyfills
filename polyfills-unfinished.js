@@ -1118,53 +1118,59 @@ if (typeof URL !== "function")
 			return false;
 		}
 
-		// IPv4
-		if (value.match(/^[0-9.]+$/))
-		{
-			return value.match(/^([1-2][0-9]|[1-9])?[0-9](\.([1-2][0-9]|[1-9])?[0-9]){3}$/);
-		}
-
 		// DNS
-		if (value.match(/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/))
+		if (/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/.test(value))
 		{
 			return true;
+		}
+
+		// IPv4
+		if (value.match(/^[0-9]{1,3}(\.[0-9]{1,3}){3}$/))
+		{
+			return value.split(".").reduce(
+				function (success, value)
+				{
+					return success && (+value < 256);
+				},
+				true
+			);
 		}
 
 		// IPv6
-		if (!(value[0] === "[" && value.substr(-1) === "]" && value.includes(":")))
+		if (value[0] === "[" && value.substr(-1) === "]" && value.includes(":"))
 		{
+			const nb = value.match(/:/g).length;
+
+			if (nb < 2 || 7 < nb)
+			{
+				return false;
+			}
+
+			const is_shrinked = value.includes("::");
+
+			if (is_shrinked ? nb === 7 : nb < 7)
+			{
+				return false;
+			}
+
+			if (is_shrinked && value.match(/::/g).length > 1)
+			{
+				return false;
+			}
+
+			if (is_shrinked)
+			{
+				value = value.replace("[::", "[0::").replace("::]", "::0]").replace("::", ":0:");
+			}
+
+			value = value.substr(1, -1);
+
+			if (/^[0-9a-f]{1,4}(:[0-9a-f]{1,4})+$/.test(value))
+			{
+				return true;
+			}
+
 			return false;
-		}
-
-		const nb = value.match(/:/g).length;
-
-		if (nb < 2 || 7 < nb)
-		{
-			return false;
-		}
-
-		const is_shrinked = value.includes("::");
-
-		if (is_shrinked ? nb === 7 : nb < 7)
-		{
-			return false;
-		}
-
-		if (is_shrinked && value.match(/::/g).length > 1)
-		{
-			return false;
-		}
-
-		if (is_shrinked)
-		{
-			value = value.replace("[::", "[0::").replace("::]", "::0]").replace("::", ":0:");
-		}
-
-		value = value.substr(1, -1);
-
-		if (value.match(/^[0-9a-f]{1,4}(:[0-9a-f]{1,4})+$/))
-		{
-			return true;
 		}
 
 		return false;
@@ -1237,10 +1243,14 @@ if (typeof URL !== "function")
 	{
 		switch (this._protocol)
 		{
-			case "http:": return "80";
-			case "https:": return "443";
-			case "ftp:": return "21";
-			default: return "";
+			case "http:":
+				return "80";
+			case "https:":
+				return "443";
+			case "ftp:":
+				return "21";
+			default:
+				return "";
 		}
 	};
 
@@ -1510,7 +1520,7 @@ if (window.URLSearchParams === undefined)
 			this.parameters[name] = [value];
 		}
 	};
-	URLSearchParams.prototype["delete"] = function (name)
+	URLSearchParams.prototype.delete = function (name)
 	{
 		name = String(name);
 		if (this.parameters.hasOwnProperty(name))
@@ -1742,7 +1752,7 @@ if (window.fetch === undefined)
 		const oldValue = this.map[name];
 		this.map[name] = oldValue ? oldValue + ", " + value : value;
 	};
-	Headers.prototype["delete"] = function (name)
+	Headers.prototype.delete = function (name)
 	{
 		delete this.map[normalize_name(name)];
 	};
@@ -1856,7 +1866,7 @@ if (window.fetch === undefined)
 		else if (init instanceof DataView)
 		{
 			this._bodyArrayBuffer = clone_buffer(init.buffer);
-			// IE 10-11 can't handle a DataView body.
+			// IE 11 can't handle a DataView body.
 			this._bodyInit = new Blob([this._bodyArrayBuffer]);
 		}
 		else if ((init instanceof ArrayBuffer) || ArrayBuffer.isView(init))
@@ -2177,7 +2187,14 @@ if (window.fetch === undefined)
 						}
 					}
 				}
-				xhr.send(typeof request._bodyInit === "undefined" ? null : request._bodyInit);
+				if (request._bodyInit)
+				{
+					xhr.send(request._bodyInit);
+				}
+				else
+				{
+					xhr.send();
+				}
 			}
 		);
 	}
