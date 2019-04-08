@@ -492,7 +492,7 @@ if (typeof window.CustomEvent !== "function")
 						{
 							fragment.appendChild(children[0]);
 						}
-						publish(this, "content", content);
+						Object.defineProperty(this, "content", { value: content });
 						return content;
 					}
 				}
@@ -692,7 +692,7 @@ if (window.WeakMap === undefined)
 	window.WeakMap = function (iterable)
 	{
 		++WeakMap.index;
-		Object.defineProperty(this, "_ref", "_weakmap_polyfill_" + WeakMap.index);
+		Object.defineProperty(this, "_ref", { value: "_weakmap_polyfill_" + WeakMap.index });
 		if (Iterator.isIterable(iterable))
 		{
 			Iterator.toArray(iterable).forEach(this.set, this);
@@ -747,7 +747,7 @@ if (window.WeakSet === undefined)
 	window.WeakSet = function (iterable)
 	{
 		++WeakSet.index;
-		Object.defineProperty(this, "_ref", "_weakset_polyfill_" + WeakSet.index);
+		Object.defineProperty(this, "_ref", { value: "_weakset_polyfill_" + WeakSet.index });
 		if (Iterator.isIterable(iterable))
 		{
 			Iterator.toArray(iterable).forEach(this.add, this);
@@ -1657,7 +1657,7 @@ if (window.AbortController === undefined)
 	function AbortController()
 	{
 		prevent_signal_instanciation = false;
-		publish(this, "signal", new AbortSignal());
+		Object.defineProperty(this, "signal", { value: new AbortSignal() });
 		prevent_signal_instanciation = true;
 	}
 	AbortController.prototype.abort = function ()
