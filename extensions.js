@@ -357,11 +357,11 @@ publish(
 		return this.then(
 			function (answer)
 			{
-				return { error: false, detail: answer };
+				return { error: false, data: answer };
 			},
 			function (reason)
 			{
-				return { error: true, reason: reason };
+				return { error: true, data: reason };
 			}
 		);
 	}
@@ -384,7 +384,7 @@ publish(
 	"finally",
 	function (callback)
 	{
-		return Promise.try(callback);
+		return this.then(callback, callback);
 	}
 );
 /* ******************************************************** */
@@ -574,106 +574,67 @@ window.Iterator = {
 };
 /* ******************************************************** */
 {
-	function aggregator(stack, element)
-	{
-		const name = element.name;
-		if (!stack.includes(name))
-		{
-			stack.push(name);
-		}
-		return stack;
-	}
 	publish(
 		HTMLFormElement.prototype,
 		"getFieldNames",
 		function ()
 		{
-			return Array.from(this.querySelectorAll("input[name], select[name], textarea[name]")).reduce(aggregator, []);
+			function aggregator(stack, element)
+			{
+				const name = element.name;
+				if (name && !stack.includes(name))
+				{
+					stack.push(name);
+				}
+				return stack;
+			}
+			return Array.from(this.elements).reduce(aggregator, []);
 		}
 	);
 }
 {
-	function extractor(name)
-	{
-		return this[name];
-	}
 	publish(
 		HTMLFormElement.prototype,
 		"getFields",
 		function ()
 		{
+			function extractor(name)
+			{
+				return this[name];
+			}
 			const names = this.getFieldNames();
 			return Object.combine(names, names.map(extractor, this.elements));
 		}
 	);
 }
 {
-	function extractor(name)
-	{
-		const field = this[name];
-		if (field instanceof RadioNodeList)
+	publish(
+		HTMLFormElement.prototype,
+		"getEditableElements",
+		function ()
 		{
-			if (this[0].type === "checkbox")
-			{
-				return Array.from(field).reduce(
-					function (stack, input)
-					{
-						if (input.checked)
-						{
-							stack.push(input.value);
-						}
-						return stack;
-					},
-					[]
-				);
-			}
-			else
-			{
-				const length = this.length;
-				let i = 0;
-				for (; i < length; ++i)
+			return Array.from(this.elements).filter(
+				function (element)
 				{
-					if (this[i].checked)
-					{
-						return this[i].value;
-					}
-				}
-				return null;
-			}
-		}
-		else
-		{
-			switch (field.type)
-			{
-				case "select-multiple":
-					return Array.from(field.options).reduce(
-						function (stack, option)
-						{
-							if (option.selected)
-							{
-								stack.push(option.value);
-							}
-							return stack;
-						},
-						[]
+					return (
+						element instanceof HTMLInputElement
+						||
+						element instanceof HTMLSelectElement
+						||
+						element instanceof HTMLTextAreaElement
 					);
-
-				case "checkbox":
-				case "radio":
-					return field.checked ? field.value : null;
-
-				default:
-					return field.value;
-			}
+				}
+			);
 		}
-	}
+	);
+}
+{
 	publish(
 		HTMLFormElement.prototype,
 		"getData",
 		function ()
 		{
-			const names = this.getFieldNames();
-			return Object.combine(names, names.map(extractor, this.elements));
+			throw new Error("Deprecated, use 'new FormData(form_element)' instead.");
 		}
 	);
 }
@@ -737,8 +698,7 @@ document.addEventListener(
 		document.querySelectorAll("select:not([multiple]):not(:checked)").forEach(
 			function (select)
 			{
-				select.selectedIndex = Array.prototype.reduce.call(
-					select.options,
+				select.selectedIndex = Array.from(select.options).reduce(
 					function (selected_index, option)
 					{
 						return option.defaultSelected ? option.index : selected_index;
