@@ -573,71 +573,62 @@ window.Iterator = {
 	}
 };
 /* ******************************************************** */
-{
-	publish(
-		HTMLFormElement.prototype,
-		"getFieldNames",
-		function ()
+publish(
+	HTMLFormElement.prototype,
+	"getEditableElements",
+	function ()
+	{
+		function discriminator(element)
 		{
-			function aggregator(stack, element)
-			{
-				const name = element.name;
-				if (name && !stack.includes(name))
-				{
-					stack.push(name);
-				}
-				return stack;
-			}
-			return Array.from(this.elements).reduce(aggregator, []);
-		}
-	);
-}
-{
-	publish(
-		HTMLFormElement.prototype,
-		"getFields",
-		function ()
-		{
-			function extractor(name)
-			{
-				return this[name];
-			}
-			const names = this.getFieldNames();
-			return Object.combine(names, names.map(extractor, this.elements));
-		}
-	);
-}
-{
-	publish(
-		HTMLFormElement.prototype,
-		"getEditableElements",
-		function ()
-		{
-			return Array.from(this.elements).filter(
-				function (element)
-				{
-					return (
-						element instanceof HTMLInputElement
-						||
-						element instanceof HTMLSelectElement
-						||
-						element instanceof HTMLTextAreaElement
-					);
-				}
+			return (
+				element instanceof HTMLInputElement
+				||
+				element instanceof HTMLSelectElement
+				||
+				element instanceof HTMLTextAreaElement
 			);
 		}
-	);
-}
-{
-	publish(
-		HTMLFormElement.prototype,
-		"getData",
-		function ()
+		return Array.from(this.elements).filter(discriminator);
+	}
+);
+publish(
+	HTMLFormElement.prototype,
+	"getFieldNames",
+	function ()
+	{
+		function aggregator(stack, element)
 		{
-			throw new Error("Deprecated, use 'new FormData(form_element)' instead.");
+			const name = element.name;
+			if (name && !stack.includes(name))
+			{
+				stack.push(name);
+			}
+			return stack;
 		}
-	);
-}
+		return this.getEditableElements().reduce(aggregator, []);
+	}
+);
+publish(
+	HTMLFormElement.prototype,
+	"getFields",
+	function ()
+	{
+		function extractor(name)
+		{
+			return this.namedItem(name);
+		}
+		const names = this.getFieldNames();
+		return Object.combine(names, names.map(extractor, this.elements));
+	}
+);
+publish(
+	HTMLFormElement.prototype,
+	"getData",
+	function ()
+	{
+		throw new Error("Deprecated, use 'new FormData(form_element)' instead.");
+	}
+);
 /* ******************************************************** */
 publish(
 	HTMLInputElement.prototype,
