@@ -352,9 +352,9 @@ Promise.try = function (callback)
 publish(
 	Promise.prototype,
 	"collapse",
-	function ()
+	function (callback)
 	{
-		return this.then(
+		const promise = this.then(
 			function (answer)
 			{
 				return { error: false, data: answer };
@@ -364,6 +364,15 @@ publish(
 				return { error: true, data: reason };
 			}
 		);
+
+		if (callback)
+		{
+			return promise.then(callback);
+		}
+		else
+		{
+			return promise;
+		}
 	}
 );
 publish(
