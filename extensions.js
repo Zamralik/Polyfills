@@ -62,35 +62,31 @@ window.scrollSmoothlyTo = function (x, y)
 			block: "start",
 			inline: "start"
 		});
-		return;
 	}
-
-	const t0 = Date.now();
-	const x0 = window.scrollX;
-	const y0 = window.scrollY;
-
-	function next()
+	else
 	{
-		const t = Date.now() - t0;
-
-		if (t < 300)
+		const t0 = Date.now();
+		const x0 = window.scrollX;
+		const y0 = window.scrollY;
+		function next()
 		{
-			const p = t / 300;
-
-			window.scrollTo(
-				(x - x0) * p + x0,
-				(y - y0) * p + y0
-			);
-
-			requestAnimationFrame(next);
+			const t = Date.now() - t0;
+			if (t < 300)
+			{
+				const p = t / 300;
+				window.scrollTo(
+					Math.round((x - x0) * p + x0),
+					Math.round((y - y0) * p + y0)
+				);
+				requestAnimationFrame(next);
+			}
+			else
+			{
+				window.scrollTo(x, y);
+			}
 		}
-		else
-		{
-			window.scrollTo(x, y);
-		}
+		requestAnimationFrame(next);
 	}
-
-	requestAnimationFrame(next);
 };
 window.scrollSmoothlyBy = function (dx, dy)
 {
@@ -581,6 +577,15 @@ window.Iterator = {
 		};
 	}
 };
+/* ******************************************************** */
+publish(
+	Element.prototype,
+	"getComputedStyle",
+	function (pseudo_element)
+	{
+		return window.getComputedStyle(this, pseudo_element || null);
+	}
+);
 /* ******************************************************** */
 publish(
 	HTMLFormElement.prototype,
