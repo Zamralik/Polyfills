@@ -24,7 +24,7 @@ window.coalesce = function (getter)
 	{
 		return getter();
 	}
-	catch (error) {}
+	catch (_) {}
 };
 /* ******************************************************** */
 window.timeout = function (delay)
