@@ -18,6 +18,15 @@ window.assert = function (test_result, error_message)
 	}
 };
 /* ******************************************************** */
+window.coalesce = function (getter)
+{
+	try
+	{
+		return getter();
+	}
+	catch (error) {}
+};
+/* ******************************************************** */
 window.timeout = function (delay)
 {
 	const promise = new Promise(
