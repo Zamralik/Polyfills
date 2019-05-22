@@ -643,13 +643,45 @@ publish(
 		throw new Error("Deprecated, use 'new FormData(form_element)' instead.");
 	}
 );
+publish(
+	HTMLFormElement.prototype,
+	"clear",
+	function ()
+	{
+		this.getEditableElements().forEach(
+			function (element)
+			{
+				switch (element.type)
+				{
+					case "select-one":
+					case "select-multiple":
+						Array.from(element.selectedOptions).forEach(
+							function (option)
+							{
+								option.selected = false;
+							}
+						);
+					break;
+
+					case "radio":
+					case "checkbox":
+						element.checked = false;
+					break;
+
+					default:
+						element.value = "";
+				}
+			}
+		);
+	}
+);
 /* ******************************************************** */
 publish(
 	HTMLInputElement.prototype,
 	"isEmpty",
 	function ()
 	{
-		return !((this.type === "checkbox" || this.type === "radio") ? this.checked : this.value);
+		return !((this.type === "radio" || this.type === "checkbox") ? this.checked : this.value);
 	}
 );
 /* ******************************************************** */
