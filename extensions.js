@@ -655,12 +655,7 @@ publish(
 				{
 					case "select-one":
 					case "select-multiple":
-						Array.from(element.selectedOptions).forEach(
-							function (option)
-							{
-								option.selected = false;
-							}
-						);
+						element.selectedIndex = -1;
 					break;
 
 					case "radio":
