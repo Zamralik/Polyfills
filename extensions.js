@@ -131,6 +131,21 @@ window.TypeCheck = {
 };
 /* ******************************************************** */
 publish(
+	Object,
+	"dive",
+	function (item, chain)
+	{
+		return chain.reduce(
+			function (item, key)
+			{
+				return (item instanceof Object && item.hasOwnProperty(key)) ? item[key] : null;
+			},
+			item
+		);
+	}
+);
+/* ******************************************************** */
+publish(
 	Number,
 	"isFloat",
 	function (value)
