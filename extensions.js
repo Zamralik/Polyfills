@@ -133,15 +133,17 @@ window.TypeCheck = {
 publish(
 	Object,
 	"dive",
-	function (item, chain)
+	function (item, chain, default_value)
 	{
-		return chain.reduce(
+		const value = chain.reduce(
 			function (item, key)
 			{
-				return (item instanceof Object && item.hasOwnProperty(key)) ? item[key] : null;
+				return (item instanceof Object && item.hasOwnProperty(key)) ? item[key] : undefined;
 			},
 			item
 		);
+
+		return value === undefined ? default_value : value;
 	}
 );
 /* ******************************************************** */
