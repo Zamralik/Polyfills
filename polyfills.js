@@ -474,33 +474,6 @@ if (typeof window.CustomEvent !== "function")
 	}
 }
 /* ******************************************************** */
-{
-	const template = document.createElement("template");
-	if (!(template.content instanceof DocumentFragment))
-	{
-		Object.defineProperty(
-			Object.getPrototypeOf(template),
-			"content",
-			{
-				get: function ()
-				{
-					if (this.tagName === "TEMPLATE")
-					{
-						const content = document.createDocumentFragment();
-						const children = item.childNodes;
-						while (children.length)
-						{
-							fragment.appendChild(children[0]);
-						}
-						Object.defineProperty(this, "content", { value: content });
-						return content;
-					}
-				}
-			}
-		);
-	}
-}
-/* ******************************************************** */
 /*		MISSING CLASSES										*/
 /* ******************************************************** */
 if (window.Map === undefined)
