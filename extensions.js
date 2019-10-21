@@ -6,104 +6,55 @@ function publish(root, name, module)
 /* ******************************************************** */
 /*		EXTENSIONS											*/
 /* ******************************************************** */
-Function.NO_OP = function () { };
-/* ******************************************************** */
-document.html = document.head.parentNode;
-/* ******************************************************** */
-window.assert = function (test_result, error_message)
-{
-	if (!test_result)
+publish(
+	window,
+	"assert",
+	function (test_result, error_message)
 	{
-		throw new Error(error_message || "Assertion failed");
-	}
-};
-/* ******************************************************** */
-window.timeout = function (delay)
-{
-	const promise = new Promise(
-		function (accept, reject)
+		if (!test_result)
 		{
-			const id = setTimeout(accept, delay);
-			promise.clear = function ()
-			{
-				clearTimeout(id);
-				reject();
-			};
+			throw new Error(error_message || "Assertion failed");
 		}
-	);
-	return promise;
-};
-/* ******************************************************** */
-window.scrollSmoothlyTo = function (x, y)
-{
-	const hasNativeSmoothScroll = (
-		window.InstallTrigger !== undefined
-		||
-		(window.chrome && (window.chrome.webstore || window.chrome.runtime))
-	);
-	if (Element.prototype.scrollIntoView && hasNativeSmoothScroll)
-	{
-		let pixel = document.querySelector("scroll-pixel");
-		if (!pixel)
-		{
-			pixel = document.createElement("scroll-pixel");
-			pixel.style.pointerEvents = "none";
-			pixel.style.opacity = "0";
-			pixel.style.display = "block";
-			pixel.style.width = "1px";
-			pixel.style.height = "1px";
-			pixel.style.position = "absolute";
-			document.body.appendChild(pixel);
-		}
-		pixel.style.left = x + "px";
-		pixel.style.top = y + "px";
-		pixel.scrollIntoView({
-			behavior: "smooth",
-			block: "start",
-			inline: "start"
-		});
 	}
-	else
+);
+/* ******************************************************** */
+publish(
+	window,
+	"timeout",
+	function (delay)
 	{
-		const t0 = Date.now();
-		const x0 = window.scrollX;
-		const y0 = window.scrollY;
-		function next()
-		{
-			const t = Date.now() - t0;
-			if (t < 300)
+		const promise = new Promise(
+			function (accept, reject)
 			{
-				const p = t / 300;
-				window.scrollTo(
-					Math.round((x - x0) * p + x0),
-					Math.round((y - y0) * p + y0)
-				);
-				requestAnimationFrame(next);
+				const id = setTimeout(accept, delay);
+				promise.clear = function ()
+				{
+					clearTimeout(id);
+					reject();
+				};
 			}
-			else
-			{
-				window.scrollTo(x, y);
-			}
-		}
-		requestAnimationFrame(next);
+		);
+
+		return promise;
 	}
-};
-window.scrollSmoothlyBy = function (dx, dy)
-{
-	scrollSmoothlyTo(window.scrollX + dx, window.scrollY + dy);
-};
-/* ******************************************************** */
-navigator.geolocation.askCurrentPosition = function (options)
-{
-	return new Promise(
-		function (accept, reject)
-		{
-			navigator.geolocation.getCurrentPosition(accept, reject, options);
-		}
-	);
-};
+);
 /* ******************************************************** */
 window.TypeCheck = {
+	isFunction: function (value)
+	{
+		// Deprecated
+		return (typeof value === "function");
+	},
+	isBoolean: function (value)
+	{
+		// Deprecated
+		return (typeof value === "boolean");
+	},
+	isString: function (value)
+	{
+		// Deprecated
+		return (typeof value === "string");
+	},
 	isDefined: function (value)
 	{
 		return (value !== undefined && value !== null);
@@ -112,23 +63,116 @@ window.TypeCheck = {
 	{
 		return (value !== null) && (typeof value === "object");
 	},
-	isFunction: function (value)
+	isIterable: function (value)
 	{
-		return (typeof value === "function");
-	},
-	isBoolean: function (value)
-	{
-		return (typeof value === "boolean");
-	},
-	isString: function (value)
-	{
-		return (typeof value === "string");
+		return (value instanceof Array) || (TypeCheck.isObject(value) && Number.isSafeInteger(value.length));
 	},
 	isNumber: function (value)
 	{
-		return (typeof value === "number");
+		return (typeof value === "number") && !Number.isNaN(value);
+	},
+	getType: function (value)
+	{
+		return Object.prototype.toString.call(value).slice(8, -1);
+	},
+	getClass: function (value)
+	{
+		return (TypeCheck.isObject(value) && value.constructor) ? (value.constructor.name || "Anonymous") : TypeCheck.getType(value);
 	}
 };
+/* ******************************************************** */
+{
+	// Polyfill itself
+	let pixel = null;
+
+	if (Element.prototype.scrollIntoView && (window.InstallTrigger !== undefined || (window.chrome && (window.chrome.webstore || window.chrome.runtime))))
+	{
+		pixel = document.createElement("scroll-pixel");
+		pixel.style.pointerEvents = "none";
+		pixel.style.opacity = "0.1";
+		pixel.style.background = "none";
+		pixel.style.border = "none";
+		pixel.style.display = "block";
+		pixel.style.width = "1px";
+		pixel.style.height = "1px";
+		pixel.style.clip = "rect(1px, 1px, 1px, 1px)";
+		pixel.style.position = "absolute";
+		pixel.style.left = "0px";
+		document.body.appendChild(pixel);
+	};
+
+	publish(
+		window,
+		"SmoothScroller",
+		{
+			moveTo: function (y)
+			{
+				if (pixel)
+				{
+					pixel.style.top = y + "px";
+					pixel.scrollIntoView({
+						behavior: "smooth",
+						block: "start",
+						inline: "start"
+					});
+				}
+				else
+				{
+					const t0 = Date.now();
+					const x0 = window.scrollX;
+					const y0 = window.scrollY;
+
+					function next()
+					{
+						const t = Date.now() - t0;
+
+						if (t < 300)
+						{
+							const p = t / 300;
+
+							window.scrollTo(
+								Math.round(x0 - x0 * p),
+								Math.round(y0 - (y0 - y) * p)
+							);
+
+							requestAnimationFrame(next);
+						}
+						else
+						{
+							window.scrollTo(0, y);
+						}
+					}
+
+					requestAnimationFrame(next);
+				}
+			},
+			moveBy: function (dy)
+			{
+				SmoothScroller.moveTo(0, window.scrollY + dy);
+			},
+			moveToElement: function (element, offset)
+			{
+				const rect = element.getBoundingClientRect();
+				offset = window.scrollY + rect.top - (offset || 0);
+				SmoothScroller.moveTo(offset_top);
+			}
+		}
+	);
+}
+/* ******************************************************** */
+window.scrollSmoothlyTo = function (x, y)
+{
+	// Deprecated
+	SmoothScroller.moveTo(y);
+};
+window.scrollSmoothlyBy = function (dx, dy)
+{
+	// Deprecated
+	SmoothScroller.moveBy(dy);
+};
+/* ******************************************************** */
+// Deprecated
+Function.NO_OP = function () { };
 /* ******************************************************** */
 publish(
 	Object,
@@ -143,16 +187,72 @@ publish(
 			item
 		);
 
-		return value === undefined ? default_value : value;
+		return TypeCheck.isDefined(value) ? value : default_value;
+	}
+);
+
+publish(
+	Object,
+	"combine",
+	function (keys, values)
+	{
+		const answer = {};
+		const length = keys.length;
+		let i = 0;
+
+		for (; i < length; ++i)
+		{
+			answer[keys[i]] = values[i];
+		}
+
+		return answer;
+	}
+);
+Object.isObject = function (value)
+{
+	// Deprecated
+	return TypeCheck.isObject(value);
+};
+Object.getType = function (value)
+{
+	// Deprecated
+	return TypeCheck.getType(value);
+};
+Object.getClass = function (value)
+{
+	// Deprecated
+	return TypeCheck.getClass(value);
+};
+publish(
+	Object.prototype,
+	"enumerate",
+	function (callback, anchor)
+	{
+		// Deprecated
+		let key;
+
+		for (key in this)
+		{
+			callback.call(anchor, key, this[key]);
+		}
 	}
 );
 /* ******************************************************** */
 publish(
 	Number,
+	"equals",
+	function (value1, value2, epsilon)
+	{
+		return Math.abs(value1 - value2) < (epsilon || Number.EPSILON);
+	}
+);
+publish(
+	Number,
 	"isFloat",
 	function (value)
 	{
-		return (typeof value === "number") && !Number.isNaN(value);
+		// Deprecated
+		return TypeCheck.isNumber(value);
 	}
 );
 publish(
@@ -160,7 +260,9 @@ publish(
 	"sign",
 	function ()
 	{
+		// Deprecated
 		const value = this;
+
 		if (Number.isNaN(value))
 		{
 			return NaN;
@@ -184,46 +286,18 @@ publish(
 	"equals",
 	function (value)
 	{
-		return Math.abs(this - value) < Number.EPSILON;
+		// Deprecated
+		return Number.equals(this, value);
 	}
 );
 /* ******************************************************** */
-Object.isObject = function (value)
-{
-	return (value instanceof Object) || value && (typeof value === "object");
-};
-{
-	const toString = Object.prototype.toString;
-	Object.getType = function (value)
-	{
-		return toString(value).slice(8, -1);
-	};
-}
-Object.getClass = function (value)
-{
-	return (value && value.constructor) ? (value.constructor.name || "Anonymous") : Object.getType(value);
-};
-Object.combine = function (keys, values)
-{
-	const answer = {};
-	const length = keys.length;
-	let i = 0;
-	for (; i < length; ++i)
-	{
-		answer[keys[i]] = values[i];
-	}
-	return answer;
-};
 publish(
-	Object.prototype,
-	"enumerate",
-	function (callback, anchor)
+	Math,
+	"randomInt",
+	function (min, max)
 	{
-		let key;
-		for (key in this)
-		{
-			callback.call(anchor, key, this[key]);
-		}
+		const delta = (1 + max - min);
+		return (Math.floor(Math.random() * delta + Date.now()) % delta) + min;
 	}
 );
 /* ******************************************************** */
@@ -237,6 +311,7 @@ publish(
 		if (this.length > length)
 		{
 			let i = 0;
+
 			for (; i < length; ++i)
 			{
 				if (this[i] !== needle[i])
@@ -244,6 +319,7 @@ publish(
 					return false;
 				}
 			}
+
 			return true;
 		}
 		else
@@ -252,12 +328,72 @@ publish(
 		}
 	}
 );
-/* ******************************************************** */
+publish(
+	Array.prototype,
+	"unique",
+	function ()
+	{
+		const answer = [];
+		const length = this.length;
+		let i = 0;
+
+		for (; i < length; ++i)
+		{
+			if (!answer.includes(this[i]))
+			{
+				answer.push(this[i]);
+			}
+		}
+
+		return answer;
+	}
+);
+publish(
+	Array.prototype,
+	"diff",
+	function (other)
+	{
+		const answer = [];
+		const length = this.length;
+		let i = 0;
+
+		for (; i < length; ++i)
+		{
+			if (!other.includes(this[i]))
+			{
+				answer.push(this[i]);
+			}
+		}
+
+		return answer;
+	}
+);
+publish(
+	Array.prototype,
+	"intersect",
+	function (other)
+	{
+		const answer = [];
+		const length = this.length;
+		let i = 0;
+
+		for (; i < length; ++i)
+		{
+			if (other.includes(this[i]))
+			{
+				answer.push(this[i]);
+			}
+		}
+
+		return answer;
+	}
+);
 publish(
 	Array.prototype,
 	"get",
 	function (index)
 	{
+		// Deprecated
 		if (!Number.isSafeInteger(index))
 		{
 			throw new Error("Invalid index");
@@ -285,83 +421,79 @@ publish(
 	"column",
 	function (key)
 	{
+		// Deprecated
 		const answer = [];
 		const length = this.length;
 		let i = 0;
+
 		for (; i < length; ++i)
 		{
 			answer.push(this[i][key]);
 		}
-		return answer;
-	}
-);
-publish(
-	Array.prototype,
-	"unique",
-	function ()
-	{
-		const answer = [];
-		const length = this.length;
-		let i = 0;
-		for (; i < length; ++i)
-		{
-			if (!answer.includes(this[i]))
-			{
-				answer.push(this[i]);
-			}
-		}
-		return answer;
-	}
-);
-publish(
-	Array.prototype,
-	"diff",
-	function (other)
-	{
-		const answer = [];
-		const length = this.length;
-		let i = 0;
-		for (; i < length; ++i)
-		{
-			if (!other.includes(this[i]))
-			{
-				answer.push(this[i]);
-			}
-		}
-		return answer;
-	}
-);
-publish(
-	Array.prototype,
-	"intersect",
-	function (other)
-	{
-		const answer = [];
-		const length = this.length;
-		let i = 0;
-		for (; i < length; ++i)
-		{
-			if (other.includes(this[i]))
-			{
-				answer.push(this[i]);
-			}
-		}
+
 		return answer;
 	}
 );
 /* ******************************************************** */
-Promise.try = function (callback)
-{
-	try
+
+/* ******************************************************** */
+publish(
+	window,
+	"Iterator",
 	{
-		const answer = callback();
-		return (answer instanceof Promise) ? answer : Promise.resolve(answer);
+		toArray: function (iterable)
+		{
+			return (iterable instanceof Array) ? iterable : Array.from(iterable);
+		},
+		from: function (iterable, copy)
+		{
+			if (copy)
+			{
+				iterable = Array.from(iterable);
+			}
+
+			const length = iterable.length;
+			let index = 0;
+
+			return {
+				next: function ()
+				{
+					if (index < length)
+					{
+						const value = iterable[index];
+						++index;
+
+						return {
+							done: false,
+							value: value
+						};
+					}
+					else
+					{
+						return { done: true };
+					}
+				}
+			};
+		}
 	}
-	catch (reason)
+);
+/* ******************************************************** */
+publish(
+	Promise,
+	"try",
+	function (callback)
 	{
-		return Promise.reject(reason);
+		try
+		{
+			const answer = callback();
+			return (answer instanceof Promise) ? answer : Promise.resolve(answer);
+		}
+		catch (reason)
+		{
+			return Promise.reject(reason);
+		}
 	}
-};
+);
 publish(
 	Promise.prototype,
 	"collapse",
@@ -396,7 +528,7 @@ publish(
 		return this.then(
 			function (answer)
 			{
-				return callback[Iterator.isIterable(answer) ? "apply" : "call"](undefined, answer);
+				return callback[TypeCheck.isIterable(answer) ? "apply" : "call"](undefined, answer);
 			}
 		);
 	}
@@ -410,11 +542,82 @@ publish(
 	}
 );
 /* ******************************************************** */
-Math.randomInt = function (min, max)
+navigator.geolocation.askCurrentPosition = function (options)
 {
-	const delta = (1 + max - min);
-	return (Math.floor(Math.random() * delta + Date.now()) % delta) + min;
+	return new Promise(
+		function (accept, reject)
+		{
+			navigator.geolocation.getCurrentPosition(accept, reject, options);
+		}
+	);
 };
+/* ******************************************************** */
+Object.defineProperty(
+	document.location.constructor.prototype,
+	"parameters",
+	{
+		get: function ()
+		{
+			return this.search.substr(1).split("&").reduce(
+				function (stack, pair)
+				{
+					pair = pair.split("=");
+					stack[pair[0]] = pair[1];
+					return stack;
+				},
+				{}
+			);
+		}
+	}
+);
+/* ******************************************************** */
+{
+	function removeAll()
+	{
+		const length = this.length;
+		let i = 0;
+		for (; i < length; ++i)
+		{
+			this[0].remove();
+		}
+	}
+	publish(HTMLCollection.prototype, "removeAll", removeAll);
+	publish(NodeList.prototype, "removeAll", removeAll);
+}
+{
+	function toFragment(clone_nodes)
+	{
+		const fragment = document.createDocumentFragment();
+		const length = this.length;
+		let i = 0;
+		if (clone_nodes)
+		{
+			for (; i < length; ++i)
+			{
+				fragment.appendChild(this[i].cloneNode(true));
+			}
+		}
+		else
+		{
+			for (; i < length; ++i)
+			{
+				fragment.appendChild(this[0]);
+			}
+		}
+		return fragment;
+	}
+	publish(HTMLCollection.prototype, "toFragment", toFragment);
+	publish(NodeList.prototype, "toFragment", toFragment);
+}
+/* ******************************************************** */
+publish(
+	EventTarget.prototype,
+	"dispatchCustomEvent",
+	function (name, data)
+	{
+		this.dispatchEvent(new CustomEvent(name, { bubbles: true, cancelable: true, detail: data }));
+	}
+);
 /* ******************************************************** */
 publish(
 	Node.prototype,
@@ -476,124 +679,7 @@ Node.getCommonAncestor = function (node1, node2)
 	return ancestors1[length - 1];
 };
 /* ******************************************************** */
-{
-	function removeAll()
-	{
-		const length = this.length;
-		let i = 0;
-		for (; i < length; ++i)
-		{
-			this[0].remove();
-		}
-	}
-	publish(HTMLCollection.prototype, "removeAll", removeAll);
-	publish(NodeList.prototype, "removeAll", removeAll);
-}
-{
-	function toFragment(clone_nodes)
-	{
-		const fragment = document.createDocumentFragment();
-		const length = this.length;
-		let i = 0;
-		if (clone_nodes)
-		{
-			for (; i < length; ++i)
-			{
-				fragment.appendChild(this[i].cloneNode(true));
-			}
-		}
-		else
-		{
-			for (; i < length; ++i)
-			{
-				fragment.appendChild(this[0]);
-			}
-		}
-		return fragment;
-	}
-	publish(HTMLCollection.prototype, "toFragment", toFragment);
-	publish(NodeList.prototype, "toFragment", toFragment);
-}
-/* ******************************************************** */
-publish(
-	EventTarget.prototype,
-	"dispatchCustomEvent",
-	function (name, data)
-	{
-		this.dispatchEvent(new CustomEvent(name, { bubbles: true, cancelable: true, detail: data }));
-	}
-);
-/* ******************************************************** */
-publish(
-	Event.prototype,
-	"cancel",
-	function ()
-	{
-		this.preventDefault();
-	}
-);
-publish(
-	Event.prototype,
-	"stop",
-	function (immediately)
-	{
-		if (immediately)
-		{
-			this.stopImmediatePropagation();
-		}
-		else
-		{
-			this.stopPropagation();
-		}
-	}
-);
-publish(
-	Event.prototype,
-	"kill",
-	function ()
-	{
-		this.preventDefault();
-		this.stopImmediatePropagation();
-	}
-);
-/* ******************************************************** */
-window.Iterator = {
-	isIterable: function (mixed)
-	{
-		return mixed && ((mixed instanceof Array) || Object.isObject(mixed) && !(mixed instanceof Function) && Number.isSafeInteger(mixed.length));
-	},
-	toArray: function (iterable)
-	{
-		return (iterable instanceof Array) ? iterable : Array.from(iterable);
-	},
-	from: function (iterable, copy)
-	{
-		if (copy)
-		{
-			iterable = Array.from(iterable);
-		}
-		const length = iterable.length;
-		let index = 0;
-		return {
-			next: function ()
-			{
-				if (index < length)
-				{
-					const value = iterable[index];
-					++index;
-					return {
-						done: false,
-						value: value
-					};
-				}
-				else
-				{
-					return { done: true };
-				}
-			}
-		};
-	}
-};
+document.html = document.head.parentNode;
 /* ******************************************************** */
 publish(
 	Element.prototype,
@@ -619,6 +705,7 @@ publish(
 				element instanceof HTMLTextAreaElement
 			);
 		}
+
 		return Array.from(this.elements).filter(discriminator);
 	}
 );
@@ -636,6 +723,7 @@ publish(
 			}
 			return stack;
 		}
+
 		return this.getEditableElements().reduce(aggregator, []);
 	}
 );
@@ -648,6 +736,7 @@ publish(
 		{
 			return this.namedItem(name);
 		}
+
 		const names = this.getFieldNames();
 		return Object.combine(names, names.map(extractor, this.elements));
 	}
@@ -715,25 +804,6 @@ publish(
 	}
 );
 /* ******************************************************** */
-Object.defineProperty(
-	document.location.constructor.prototype,
-	"parameters",
-	{
-		get: function ()
-		{
-			return this.search.substr(1).split("&").reduce(
-				function (stack, pair)
-				{
-					pair = pair.split("=");
-					stack[pair[0]] = pair[1];
-					return stack;
-				},
-				{}
-			);
-		}
-	}
-);
-/* ******************************************************** */
 document.addEventListener(
 	"DOMContentLoaded",
 	function ()
@@ -744,6 +814,7 @@ document.addEventListener(
 				form.reset();
 			}
 		);
+
 		document.querySelectorAll("select:not([multiple]):not(:checked)").forEach(
 			function (select)
 			{
