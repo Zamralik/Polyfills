@@ -57,7 +57,7 @@ window.TypeCheck = {
 	},
 	isDefined: function (value)
 	{
-		return (value !== undefined && value !== null);
+		return (value !== undefined) && (value !== null);
 	},
 	isObject: function (value)
 	{
@@ -77,7 +77,7 @@ window.TypeCheck = {
 	},
 	getClass: function (value)
 	{
-		return (TypeCheck.isObject(value) && value.constructor) ? (value.constructor.name || "Anonymous") : TypeCheck.getType(value);
+		return (TypeCheck.isObject(value) && (typeof value.constructor === "function")) ? (value.constructor.name || "Anonymous") : TypeCheck.getType(value);
 	}
 };
 /* ******************************************************** */

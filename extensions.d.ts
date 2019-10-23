@@ -3,6 +3,11 @@ interface Dictionary<T>
 	[key: string]: T;
 }
 
+interface ClassConstructor<T>
+{
+	new (...args: any[]): T;
+}
+
 /* Throw an Error if "test_result" is falsy */
 declare function assert(test_result: any, error_message?: string): void;
 
