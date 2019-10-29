@@ -71,10 +71,6 @@ window.TypeCheck = {
 	{
 		return (value instanceof Array) || (TypeCheck.isObject(value) && Number.isSafeInteger(value.length));
 	},
-	isNumber: function (value)
-	{
-		return (typeof value === "number") && !Number.isNaN(value);
-	},
 	getType: function (value)
 	{
 		return Object.prototype.toString.call(value).slice(8, -1);

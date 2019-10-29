@@ -19,9 +19,10 @@ declare namespace TypeCheck
 	function isDefined<T>(value: T): value is NonNullable<T>;
 	/* Works even if "value" do not inherit from Object */
 	function isObject(value: unknown): value is Object;
+	/* Same as above, but include functions as well */
+	function isObjectLike(value: unknown): value is Object;
+	/* An object like with a property length containing an integer */
 	function isIterable<T>(value: unknown): value is ArrayLike<T>;
-	/* "value" is a number except NaN */
-	function isNumber(value: unknown): value is number;
 	function getType(value: any): string;
 	/* Same as "getType", but for objects it returns the constructor name */
 	function getClass(value: any): string;
