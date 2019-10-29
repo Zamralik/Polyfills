@@ -135,13 +135,18 @@ window.TypeCheck = {
 		{
 			moveTo: function (y)
 			{
+				if (!Number.isSafeInteger(y) || y < 0)
+				{
+					y = 0;
+				}
+
 				if (pixel)
 				{
 					pixel.style.top = y + "px";
 					pixel.scrollIntoView({
 						behavior: "smooth",
 						block: "start",
-						inline: "start"
+						inline: "nearest"
 					});
 				}
 				else
@@ -176,12 +181,12 @@ window.TypeCheck = {
 			},
 			moveBy: function (dy)
 			{
-				SmoothScroller.moveTo(0, window.scrollY + dy);
+				SmoothScroller.moveTo(window.scrollY + dy);
 			},
 			moveToElement: function (element, offset)
 			{
 				const rect = element.getBoundingClientRect();
-				offset = window.scrollY + rect.top - (offset || 0);
+				offset = window.scrollY + rect.top - (Number.isSafeInteger(offset) ? offset : 0);
 				SmoothScroller.moveTo(offset);
 			}
 		}
