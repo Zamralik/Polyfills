@@ -59,6 +59,10 @@ window.TypeCheck = {
 	{
 		return (value !== undefined) && (value !== null);
 	},
+	isObjectLike: function (value)
+	{
+		return (value !== null) && ((typeof value === "object") || (typeof value === "function"));
+	},
 	isObject: function (value)
 	{
 		return (value !== null) && (typeof value === "object");
@@ -77,7 +81,31 @@ window.TypeCheck = {
 	},
 	getClass: function (value)
 	{
-		return (TypeCheck.isObject(value) && (typeof value.constructor === "function")) ? (value.constructor.name || "Anonymous") : TypeCheck.getType(value);
+		if (TypeCheck.isObject(value))
+		{
+			const prototype = Object.getPrototypeOf(value);
+
+			if (prototype instanceof Object && prototype.hasOwnProperty("constructor"))
+			{
+				const constructor = prototype.constructor;
+
+				if (typeof constructor === "function" && constructor.hasOwnProperty("name"))
+				{
+					const name = constructor.name;
+
+					if (typeof name === "string" && name.length > 0)
+					{
+						return name;
+					}
+				}
+
+				return "Unnamed";
+			}
+
+			return "RawData";
+		}
+
+		return Typecheck.getType(value);
 	}
 };
 /* ******************************************************** */
@@ -154,7 +182,7 @@ window.TypeCheck = {
 			{
 				const rect = element.getBoundingClientRect();
 				offset = window.scrollY + rect.top - (offset || 0);
-				SmoothScroller.moveTo(offset_top);
+				SmoothScroller.moveTo(offset);
 			}
 		}
 	);
@@ -531,14 +559,6 @@ publish(
 				return callback[TypeCheck.isIterable(answer) ? "apply" : "call"](undefined, answer);
 			}
 		);
-	}
-);
-publish(
-	Promise.prototype,
-	"finally",
-	function (callback)
-	{
-		return this.then(callback, callback);
 	}
 );
 /* ******************************************************** */

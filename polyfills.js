@@ -991,6 +991,16 @@ if (window.Promise === undefined)
 		// Alias of Promise::then([onAccept], [onReject])
 		return this.then(undefined, onReject);
 	};
+	// Promise::finally([callback])
+	Promise.prototype.finally = function _finally_(callback)
+	{
+		function onAny()
+		{
+			return callback();
+		}
+
+		return this.then(onAny, onAny);
+	};
 	// Promise::resolve([answer])
 	// Ensure you have a settled promise
 	Promise.resolve = function resolve(answer)
@@ -1075,6 +1085,18 @@ if (window.Promise === undefined)
 	};
 
 	window.Promise = Promise;
+}
+
+if (!Promise.prototype.finally)
+{
+	publish(
+		Promise.prototype,
+		"finally",
+		function (callback)
+		{
+			return this.then(callback, callback);
+		}
+	);
 }
 /* ******************************************************** */
 if (typeof URL !== "function")
