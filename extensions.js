@@ -135,7 +135,7 @@ window.TypeCheck = {
 		{
 			moveTo: function (y)
 			{
-				if (!Number.isSafeInteger(y) || y < 0)
+				if (!Number.isFinite(y) || y < 0)
 				{
 					y = 0;
 				}
@@ -186,7 +186,7 @@ window.TypeCheck = {
 			moveToElement: function (element, offset)
 			{
 				const rect = element.getBoundingClientRect();
-				offset = window.scrollY + rect.top - (Number.isSafeInteger(offset) ? offset : 0);
+				offset = window.scrollY + rect.top - (Number.isFinite(offset) ? offset : 0);
 				SmoothScroller.moveTo(offset);
 			}
 		}
