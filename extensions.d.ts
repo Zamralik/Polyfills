@@ -160,3 +160,7 @@ interface HTMLTextAreaElement
 {
 	isEmpty: () => boolean;
 }
+
+declare function debounce(delay: number, callback: ((...args: any[]) => void)): ((...args: any[]) => void);
+
+declare function debounce_event(target: EventTarget, event_type: string, delay: number, listener: (event: Event) => void): void;

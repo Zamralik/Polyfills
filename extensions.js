@@ -825,6 +825,31 @@ publish(
 	}
 );
 /* ******************************************************** */
+function debounce(delay, callback)
+{
+	let id = 0;
+
+	function debounced()
+	{
+		const args = arguments;
+
+		function wrapper()
+		{
+			callback.apply(undefined, args);
+		}
+
+		clearTimeout(id);
+		id = setTimeout(wrapper, delay);
+	}
+
+	return debounced;
+}
+/* ******************************************************** */
+function debounce_event(target, event_type, delay, callback)
+{
+	target.addEventListener(event_type, debounce(delay, listener));
+}
+/* ******************************************************** */
 document.addEventListener(
 	"DOMContentLoaded",
 	function ()
