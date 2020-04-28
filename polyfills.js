@@ -11,6 +11,33 @@ if (window.EventTarget === undefined)
 	window.EventTarget = Node;
 }
 /* ******************************************************** */
+if (window.scrollY === undefined)
+{
+	Object.defineProperty(
+		window,
+		"scrollY",
+		{
+			get: function ()
+			{
+				return window.pageYOffset;
+			}
+		}
+	);
+}
+if (window.scrollX === undefined)
+{
+	Object.defineProperty(
+		window,
+		"scrollX",
+		{
+			get: function ()
+			{
+				return window.pageXOffset;
+			}
+		}
+	);
+}
+/* ******************************************************** */
 if (Object.values === undefined)
 {
 	publish(
