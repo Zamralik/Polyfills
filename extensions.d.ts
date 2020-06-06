@@ -11,6 +11,8 @@ interface ClassConstructor<T>
 /* Throw an Error if "test_result" is falsy */
 declare function assert(test_result: any, error_message?: string): void;
 
+declare function debounce(delay: number, callback: (...args: any[]) => void): (...args: any[]) => void;
+
 declare function timeout(delay?: number, signal?: AbortSignal): Promise<void>;
 
 declare namespace TypeCheck
@@ -26,6 +28,10 @@ declare namespace TypeCheck
 	function getType(value: any): string;
 	/* Same as "getType", but for objects it returns the constructor name */
 	function getClass(value: any): string;
+	function isFunction(value: unknown): value is (...args: any[]) => any;
+	function isBoolean(value: unknown): value is boolean;
+	function isString(value: unknown): value is string;
+	function isNumber(value: unknown): value is number;
 }
 
 declare namespace SmoothScroller
@@ -160,7 +166,3 @@ interface HTMLTextAreaElement
 {
 	isEmpty: () => boolean;
 }
-
-declare function debounce(delay: number, callback: ((...args: any[]) => void)): ((...args: any[]) => void);
-
-declare function debounce_event(target: EventTarget, event_type: string, delay: number, listener: (event: Event) => void): void;

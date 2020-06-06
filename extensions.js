@@ -20,6 +20,40 @@ publish(
 /* ******************************************************** */
 publish(
 	window,
+	"debounce",
+	function (delay, callback)
+	{
+		let id = 0;
+
+		function debounced()
+		{
+			const args = arguments;
+
+			function wrapper()
+			{
+				callback.apply(undefined, args);
+			}
+
+			clearTimeout(id);
+			id = setTimeout(wrapper, delay);
+		}
+
+		return debounced;
+	}
+);
+/* ******************************************************** */
+publish(
+	window,
+	"debounce_event",
+	function (target, event_type, delay, callback, options)
+	{
+		// Deprecated
+		target.addEventListener(event_type, debounce(delay, callback), options || false);
+	}
+);
+/* ******************************************************** */
+publish(
+	window,
 	"timeout",
 	function (delay)
 	{
@@ -42,18 +76,19 @@ publish(
 window.TypeCheck = {
 	isFunction: function (value)
 	{
-		// Deprecated
 		return (typeof value === "function");
 	},
 	isBoolean: function (value)
 	{
-		// Deprecated
 		return (typeof value === "boolean");
 	},
 	isString: function (value)
 	{
-		// Deprecated
 		return (typeof value === "string");
+	},
+	isNumber: function (value)
+	{
+		return (typeof value === "number");
 	},
 	isDefined: function (value)
 	{
@@ -562,6 +597,14 @@ publish(
 		);
 	}
 );
+publish(
+	Promise.prototype,
+	"finally",
+	function (callback)
+	{
+		return this.then(callback, callback);
+	}
+);
 /* ******************************************************** */
 navigator.geolocation.askCurrentPosition = function (options)
 {
@@ -824,31 +867,6 @@ publish(
 		return !this.value;
 	}
 );
-/* ******************************************************** */
-function debounce(delay, callback)
-{
-	let id = 0;
-
-	function debounced()
-	{
-		const args = arguments;
-
-		function wrapper()
-		{
-			callback.apply(undefined, args);
-		}
-
-		clearTimeout(id);
-		id = setTimeout(wrapper, delay);
-	}
-
-	return debounced;
-}
-/* ******************************************************** */
-function debounce_event(target, event_type, delay, callback)
-{
-	target.addEventListener(event_type, debounce(delay, listener));
-}
 /* ******************************************************** */
 document.addEventListener(
 	"DOMContentLoaded",
