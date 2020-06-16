@@ -155,14 +155,20 @@ interface HTMLFormElement
 interface HTMLInputElement
 {
 	isEmpty: () => boolean;
+	reset: () => void;
+	clear: () => void;
 }
 
 interface HTMLSelectElement
 {
 	isEmpty: () => boolean;
+	reset: () => void;
+	clear: () => void;
 }
 
 interface HTMLTextAreaElement
 {
 	isEmpty: () => boolean;
+	reset: () => void;
+	clear: () => void;
 }
