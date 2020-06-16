@@ -979,7 +979,7 @@ publish(
 	}
 );
 publish(
-	HTMLTextareaElement.prototype,
+	HTMLTextAreaElement.prototype,
 	"reset",
 	function ()
 	{
@@ -987,7 +987,7 @@ publish(
 	}
 );
 publish(
-	HTMLTextareaElement.prototype,
+	HTMLTextAreaElement.prototype,
 	"clear",
 	function ()
 	{
