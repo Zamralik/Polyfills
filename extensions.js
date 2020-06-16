@@ -901,6 +901,36 @@ publish(
 		return !((this.type === "radio" || this.type === "checkbox") ? this.checked : this.value);
 	}
 );
+publish(
+	HTMLInputElement.prototype,
+	"reset",
+	function ()
+	{
+		if (this.type === "checkbox" || this.type === "radio")
+		{
+			this.checked = this.defaultChecked;
+		}
+		else
+		{
+			this.value = this.defaultValue;
+		}
+	}
+);
+publish(
+	HTMLInputElement.prototype,
+	"clear",
+	function ()
+	{
+		if (this.type === "checkbox" || this.type === "radio")
+		{
+			this.checked = false;
+		}
+		else
+		{
+			this.value = "";
+		}
+	}
+);
 /* ******************************************************** */
 publish(
 	HTMLSelectElement.prototype,
@@ -910,6 +940,35 @@ publish(
 		return this.selectedIndex === -1;
 	}
 );
+publish(
+	HTMLSelectElement.prototype,
+	"reset",
+	function ()
+	{
+		if (this.multiple)
+		{
+			const option = this.querySelector("option[selected]");
+			this.selectedIndex = option ? option.index : 0;
+		}
+		else
+		{
+			Array.from(this.options).forEach(
+				function (option)
+				{
+					option.selected = option.defaultSelected;
+				}
+			);
+		}
+	}
+);
+publish(
+	HTMLSelectElement.prototype,
+	"clear",
+	function ()
+	{
+		this.selectedIndex = -1;
+	}
+);
 /* ******************************************************** */
 publish(
 	HTMLTextAreaElement.prototype,
@@ -917,6 +976,22 @@ publish(
 	function ()
 	{
 		return !this.value;
+	}
+);
+publish(
+	HTMLTextareaElement.prototype,
+	"reset",
+	function ()
+	{
+		this.value = this.defaultValue;
+	}
+);
+publish(
+	HTMLTextareaElement.prototype,
+	"clear",
+	function ()
+	{
+		this.value = "";
 	}
 );
 /* ******************************************************** */
