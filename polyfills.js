@@ -1846,7 +1846,7 @@ if (window.fetch === undefined)
 	function consume(body)
 	{
 		return new Promise(
-			function (accept, reject)
+			function (accept)
 			{
 				if (body.bodyUsed)
 				{
@@ -2099,7 +2099,7 @@ if (window.fetch === undefined)
 			case 510: return "Not Extended";
 			case 511: return "Network Authentication Required";
 			// Other
-			default: return "Uknown Status";
+			default: return "Unknown Status";
 		}
 	}
 	function Request(input, options)
@@ -2221,8 +2221,8 @@ if (window.fetch === undefined)
 					let raw_headers = xhr.getAllResponseHeaders();
 					if (raw_headers)
 					{
-						raw_headers = raw_headers.replace(/\r?\n[\t ]+/g, " ");
-						raw_headers.trim().split(/\r?\n/).forEach(
+						raw_headers = raw_headers.replace(/\r?\n[\t ]+/g, " ").trim();
+						raw_headers.split(/\r?\n/).forEach(
 							function (line)
 							{
 								line = line.split(":");
@@ -2302,4 +2302,36 @@ if (window.fetch === undefined)
 	publish(window, "Headers", Headers);
 	publish(window, "Request", Request);
 	publish(window, "Response", Response);
+}
+/* ******************************************************** */
+{
+	const template = document.createElement("template");
+	if (!(template.content instanceof DocumentFragment))
+	{
+		Object.defineProperty(
+			Object.getPrototypeOf(template),
+			"content",
+			{
+				configurable: true,
+				get: function()
+				{
+					if (this.tagName === "TEMPLATE")
+					{
+						if (!this._content)
+						{
+							const content = document.createDocumentFragment();
+							const children = this.childNodes;
+							while (children.length > 0)
+							{
+								content.appendChild(children[0]);
+							}
+							publish(this, "_content", content);
+						}
+
+						return this._content;
+					}
+				}
+			}
+		);
+	}
 }

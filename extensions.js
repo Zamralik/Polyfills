@@ -55,17 +55,28 @@ publish(
 publish(
 	window,
 	"timeout",
-	function (delay)
+	function (delay, signal)
 	{
 		const promise = new Promise(
 			function (accept, reject)
 			{
-				const id = setTimeout(accept, delay);
-				promise.clear = function ()
+				if (!signal)
 				{
-					clearTimeout(id);
-					reject();
-				};
+					setTimeout(accept, delay);
+				}
+				else
+				{
+					const id = setTimeout(accept, delay);
+
+					signal.addEventListener(
+						"abort",
+						function ()
+						{
+							clearTimeout(id);
+							reject();
+						}
+					);
+				}
 			}
 		);
 
@@ -759,18 +770,7 @@ publish(
 	"getEditableElements",
 	function ()
 	{
-		function discriminator(element)
-		{
-			return (
-				element instanceof HTMLInputElement
-				||
-				element instanceof HTMLSelectElement
-				||
-				element instanceof HTMLTextAreaElement
-			);
-		}
-
-		return Array.from(this.elements).filter(discriminator);
+		return Array.from(this.querySelectorAll("input, select, textarea"));
 	}
 );
 publish(
@@ -846,7 +846,7 @@ publish(
 	function (data)
 	{
 		this.getFieldNames().forEach(
-			(name) =>
+			function (name)
 			{
 				const element = this.elements.namedItem(name);
 
@@ -863,7 +863,7 @@ publish(
 				}
 				else if (element instanceof HTMLTextAreaElement)
 				{
-					element.value = data && data[name] || `${name} - Lorem ipsum dolor sit amet`;
+					element.value = data && data[name] || (name + " - Lorem ipsum dolor sit amet");
 				}
 				else if (element instanceof HTMLSelectElement && element.selectedIndex > 0)
 				{
@@ -890,6 +890,47 @@ publish(
 				}
 			}
 		);
+	}
+);
+/* ******************************************************** */
+publish(
+	HTMLFieldSetElement.prototype,
+	"getEditableElements",
+	function ()
+	{
+		return Array.from(this.querySelectorAll("input, select, textarea"));
+	}
+);
+publish(
+	HTMLFieldSetElement.prototype,
+	"getFieldNames",
+	function ()
+	{
+		function aggregator(stack, element)
+		{
+			const name = element.name;
+			if (name && !stack.includes(name))
+			{
+				stack.push(name);
+			}
+			return stack;
+		}
+
+		return this.getEditableElements().reduce(aggregator, []);
+	}
+);
+publish(
+	HTMLFieldSetElement.prototype,
+	"getFields",
+	function ()
+	{
+		function extractor(name)
+		{
+			return this.namedItem(name);
+		}
+
+		const names = this.getFieldNames();
+		return Object.combine(names, names.map(extractor, this.elements));
 	}
 );
 /* ******************************************************** */
