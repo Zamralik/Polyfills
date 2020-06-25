@@ -850,6 +850,11 @@ publish(
 			{
 				const element = this.elements.namedItem(name);
 
+				if (element.hidden)
+				{
+					return;
+				}
+
 				if (element instanceof HTMLInputElement)
 				{
 					if (element.type === "checkbox" || element.type === "radio")
@@ -869,7 +874,7 @@ publish(
 				{
 					if (data && typeof data[name] === "number" && data[name] < element.options.length)
 					{
-						element.selectedIndex = data && data[name];
+						element.selectedIndex = data[name];
 					}
 					else
 					{
@@ -888,7 +893,8 @@ publish(
 				{
 					element[0].checked = true;
 				}
-			}
+			},
+			this
 		);
 	}
 );
