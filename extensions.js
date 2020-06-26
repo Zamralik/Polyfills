@@ -850,7 +850,7 @@ publish(
 			{
 				const element = this.elements.namedItem(name);
 
-				if (element.hidden)
+				if (element.hidden || element.readOnly)
 				{
 					return;
 				}
