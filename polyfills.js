@@ -284,6 +284,23 @@ if (Number.isSafeInteger === undefined)
 	};
 }
 /* ******************************************************** */
+if (Node.prototype.append === undefined)
+{
+	publish(
+		Node.prototype,
+		"append",
+		function ()
+		{
+			const args = arguments;
+			let i = 0;
+			for (; i < args.length; ++i)
+			{
+				const arg = args[i];
+				this.appendChild((typeof arg === "string") ? document.createTextNode(arg) : arg);
+			}
+		}
+	);
+}
 if (Node.prototype.remove === undefined)
 {
 	publish(
