@@ -84,6 +84,22 @@ publish(
 	}
 );
 /* ******************************************************** */
+publish(
+	window,
+	"nextRepaint",
+	function ()
+	{
+		const promise = new Promise(
+			function (accept)
+			{
+				requestAnimationFrame(accept);
+			}
+		);
+
+		return promise;
+	}
+);
+/* ******************************************************** */
 window.TypeCheck = {
 	isFunction: function (value)
 	{

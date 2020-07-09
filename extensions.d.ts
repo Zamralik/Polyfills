@@ -15,6 +15,8 @@ declare function debounce(delay: number, callback: (...args: any[]) => void): (.
 
 declare function timeout(delay?: number, signal?: AbortSignal): Promise<void>;
 
+declare function nextRepaint(): Promise<void>;
+
 declare namespace TypeCheck
 {
 	/* Ensure that "value" is neither NULL nor UNDEFINED */
