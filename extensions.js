@@ -629,7 +629,12 @@ publish(
 	"finally",
 	function (callback)
 	{
-		return this.then(callback, callback);
+		function onAny()
+		{
+			return callback();
+		}
+
+		return this.then(onAny, onAny);
 	}
 );
 /* ******************************************************** */

@@ -1035,6 +1035,7 @@ if (window.Promise === undefined)
 		// Alias of Promise::then([onAccept], [onReject])
 		return this.then(undefined, onReject);
 	};
+	/*
 	// Promise::finally([callback])
 	Promise.prototype.finally = function _finally_(callback)
 	{
@@ -1045,6 +1046,7 @@ if (window.Promise === undefined)
 
 		return this.then(onAny, onAny);
 	};
+	*/
 	// Promise::resolve([answer])
 	// Ensure you have a settled promise
 	Promise.resolve = function resolve(answer)
@@ -1129,18 +1131,6 @@ if (window.Promise === undefined)
 	};
 
 	window.Promise = Promise;
-}
-
-if (!Promise.prototype.finally)
-{
-	publish(
-		Promise.prototype,
-		"finally",
-		function (callback)
-		{
-			return this.then(callback, callback);
-		}
-	);
 }
 /* ******************************************************** */
 if (typeof URL !== "function")
@@ -1678,6 +1668,7 @@ if (window.AbortController === undefined)
 			throw new Error("Cannot instanciate AbortSignal");
 		}
 		this.aborted = false;
+		this.listeners = [];
 	}
 	AbortSignal.prototype.addEventListener = function (type, listener)
 	{
@@ -1710,11 +1701,14 @@ if (window.AbortController === undefined)
 				{
 					listener(event);
 				}
-				catch (error) { }
+				catch (error)
+				{
+					console.log(error);
+				}
 			}
 		);
 		this.signal.listeners = undefined;
-	}
+	};
 	publish(window, "AbortController", AbortController);
 	publish(window, "AbortSignal", AbortSignal);
 }
@@ -2325,6 +2319,18 @@ if (window.fetch === undefined)
 	const template = document.createElement("template");
 	if (!(template.content instanceof DocumentFragment))
 	{
+		document.querySelectorAll("template").forEach(
+			function (template)
+			{
+				const content = document.createDocumentFragment();
+				while (template.firstChild)
+				{
+					content.appendChild(template.firstChild);
+				}
+				publish(template, "content", content);
+			}
+		);
+		/*
 		Object.defineProperty(
 			Object.getPrototypeOf(template),
 			"content",
@@ -2350,5 +2356,6 @@ if (window.fetch === undefined)
 				}
 			}
 		);
+		*/
 	}
 }
