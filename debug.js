@@ -25,7 +25,7 @@ function publish(root, name, module)
 		return emitter._listeners_[key];
 	}
 
-	const attach = EventTarget.prototype.   addEventListener;
+	const attach = EventTarget.prototype.addEventListener;
 	const detach = EventTarget.prototype.removeEventListener;
 
 	publish(
