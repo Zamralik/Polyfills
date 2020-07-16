@@ -1729,6 +1729,18 @@ if (typeof DOMException !== "function")
 	publish(window, "DOMException", DOMException);
 }
 /* ******************************************************** */
+if (FormData.prototype.set === undefined)
+{
+	publish(
+		FormData.prototype,
+		"set",
+		function (key, value)
+		{
+			this.append(key, value);
+		}
+	);
+}
+/* ******************************************************** */
 // No more needs for XMLHttpRequest!
 if (window.fetch === undefined)
 {
