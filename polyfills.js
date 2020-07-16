@@ -2330,6 +2330,22 @@ if (window.fetch === undefined)
 				publish(template, "content", content);
 			}
 		);
+		// Temporary
+		function innerHTML()
+		{
+			return Array.from(this.content.childNodes).map(
+				function (node)
+				{
+					return node.innerHTML;
+				}
+			).join("");
+		}
+		document.querySelectorAll("template").forEach(
+			function (template)
+			{
+				Object.defineProperty(template, "innerHTML", { get: innerHTML });
+			}
+		);
 		/*
 		Object.defineProperty(
 			Object.getPrototypeOf(template),
