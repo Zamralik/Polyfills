@@ -2348,7 +2348,17 @@ if (window.fetch === undefined)
 			return Array.from(this.content.childNodes).map(
 				function (node)
 				{
-					return node.innerHTML;
+					switch (node.nodeType)
+					{
+						case Node.ELEMENT_NODE:
+							return node.outerHTML;
+
+						case Node.TEXT_NODE:
+							return node.value;
+
+						default:
+							return "";
+					}
 				}
 			).join("");
 		}
