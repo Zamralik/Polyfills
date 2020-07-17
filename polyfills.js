@@ -2328,6 +2328,35 @@ if (window.fetch === undefined)
 }
 /* ******************************************************** */
 {
+	const div = document.createElement("div");
+	div.hidden = true;
+	if (!div.hasAttribute("hidden"))
+	{
+		Object.defineProperty(
+			HTMLElement.prototype,
+			"hidden",
+			{
+				set: function (value)
+				{
+					if (value)
+					{
+						this.setAttribute("hidden", "");
+					}
+					else
+					{
+						this.removeAttribute("hidden");
+					}
+				},
+				get: function ()
+				{
+					return this.hasAttribute("hidden");
+				}
+			}
+		);
+	}
+}
+/* ******************************************************** */
+{
 	const template = document.createElement("template");
 	if (!(template.content instanceof DocumentFragment))
 	{
