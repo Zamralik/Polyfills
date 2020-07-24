@@ -6,38 +6,6 @@ function publish(root, name, module)
 /* ******************************************************** */
 /*		POLYFILLS											*/
 /* ******************************************************** */
-if (window.EventTarget === undefined)
-{
-	window.EventTarget = Node;
-}
-/* ******************************************************** */
-if (window.scrollY === undefined)
-{
-	Object.defineProperty(
-		window,
-		"scrollY",
-		{
-			get: function ()
-			{
-				return window.pageYOffset;
-			}
-		}
-	);
-}
-if (window.scrollX === undefined)
-{
-	Object.defineProperty(
-		window,
-		"scrollX",
-		{
-			get: function ()
-			{
-				return window.pageXOffset;
-			}
-		}
-	);
-}
-/* ******************************************************** */
 if (Object.values === undefined)
 {
 	publish(
@@ -98,27 +66,6 @@ if (Object.assign === undefined)
 			return target;
 		}
 	);
-}
-/* ******************************************************** */
-if (NodeList.prototype.forEach === undefined)
-{
-	publish(
-		NodeList.prototype,
-		"forEach",
-		function (callback, anchor)
-		{
-			let i = 0;
-			for (; i < this.length; ++i)
-			{
-				callback.call(anchor, this[i], i, this);
-			}
-		}
-	);
-}
-/* ******************************************************** */
-if (window.RadioNodeList === undefined)
-{
-	window.RadioNodeList = HTMLCollection;
 }
 /* ******************************************************** */
 if (String.prototype.includes === undefined)
@@ -284,6 +231,137 @@ if (Number.isSafeInteger === undefined)
 	};
 }
 /* ******************************************************** */
+if (navigator.sendBeacon === undefined)
+{
+	navigator.sendBeacon = function (url, data)
+	{
+		const xhr = new XMLHttpRequest();
+		xhr.open("POST", url, false);
+		xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+		xhr.send(data);
+	};
+}
+/* ******************************************************** */
+if (window.setImmediate === undefined)
+{
+	window.setImmediate = function ()
+	{
+		const args = Array.from(arguments);
+		const callback = args.shift();
+		return setTimeout(
+			function ()
+			{
+				callback.apply(undefined, args);
+			},
+			0
+		);
+	};
+	window.clearImmediate = function (id)
+	{
+		clearTimeout(id);
+	};
+}
+/* ******************************************************** */
+if (window.EventTarget === undefined)
+{
+	window.EventTarget = Node;
+}
+/* ******************************************************** */
+if (window.scrollY === undefined)
+{
+	Object.defineProperty(
+		window,
+		"scrollY",
+		{
+			get: function ()
+			{
+				return window.pageYOffset;
+			}
+		}
+	);
+}
+if (window.scrollX === undefined)
+{
+	Object.defineProperty(
+		window,
+		"scrollX",
+		{
+			get: function ()
+			{
+				return window.pageXOffset;
+			}
+		}
+	);
+}
+/* ******************************************************** */
+if (typeof window.CustomEvent !== "function")
+{
+	window.CustomEvent = function (event_name, params)
+	{
+		const event = document.createEvent("CustomEvent");
+		event.initCustomEvent(
+			event_name,
+			params && params.bubbles && true,
+			params && params.cancelable && true,
+			params && params.detail || undefined
+		);
+		return event;
+	};
+}
+/* ******************************************************** */
+if (NodeList.prototype.forEach === undefined)
+{
+	publish(
+		NodeList.prototype,
+		"forEach",
+		function (callback, anchor)
+		{
+			let i = 0;
+			for (; i < this.length; ++i)
+			{
+				callback.call(anchor, this[i], i, this);
+			}
+		}
+	);
+}
+/* ******************************************************** */
+if (window.RadioNodeList === undefined)
+{
+	window.RadioNodeList = HTMLCollection;
+}
+/* ******************************************************** */
+{
+	const form = document.createElement("form");
+	const input_1 = document.createElement("input");
+	const input_2 = document.createElement("input");
+	input_1.type = "text";
+	input_2.type = "text";
+	input_1.name = "test";
+	input_2.name = "test";
+	form.appendChild(input_1);
+	form.appendChild(input_2);
+	if (form.elements.namedItem("test") === input_1)
+	{
+		publish(
+			HTMLCollection.prototype,
+			"namedItem",
+			function (name)
+			{
+				const matches = [];
+				let i = 0;
+				for (; i < this.length; ++i)
+				{
+					if (this.item(i).name === name)
+					{
+						matches.push(this.item(i));
+					}
+				}
+				return matches.length > 1 ? matches : matches[0];
+			}
+		);
+	}
+}
+/* ******************************************************** */
 if (Node.prototype.append === undefined)
 {
 	publish(
@@ -424,50 +502,33 @@ if (Element.prototype.closest === undefined)
 	);
 }
 /* ******************************************************** */
-if (navigator.sendBeacon === undefined)
 {
-	navigator.sendBeacon = function (url, data)
+	const div = document.createElement("div");
+	div.hidden = true;
+	if (!div.hasAttribute("hidden"))
 	{
-		const xhr = new XMLHttpRequest();
-		xhr.open("POST", url, false);
-		xhr.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
-		xhr.send(data);
-	};
-}
-/* ******************************************************** */
-if (window.setImmediate === undefined)
-{
-	window.setImmediate = function ()
-	{
-		const args = Array.from(arguments);
-		const callback = args.shift();
-		return setTimeout(
-			function ()
+		Object.defineProperty(
+			HTMLElement.prototype,
+			"hidden",
 			{
-				callback.apply(undefined, args);
-			},
-			0
+				set: function (value)
+				{
+					if (value)
+					{
+						this.setAttribute("hidden", "");
+					}
+					else
+					{
+						this.removeAttribute("hidden");
+					}
+				},
+				get: function ()
+				{
+					return this.hasAttribute("hidden");
+				}
+			}
 		);
-	};
-	window.clearImmediate = function (id)
-	{
-		clearTimeout(id);
-	};
-}
-/* ******************************************************** */
-if (typeof window.CustomEvent !== "function")
-{
-	window.CustomEvent = function (event, params)
-	{
-		const mimic = document.createEvent("CustomEvent");
-		mimic.initCustomEvent(
-			event,
-			params && params.bubbles && true,
-			params && params.cancelable && true,
-			params && params.detail || undefined
-		);
-		return mimic;
-	};
+	}
 }
 /* ******************************************************** */
 {
@@ -2325,35 +2386,6 @@ if (window.fetch === undefined)
 	publish(window, "Headers", Headers);
 	publish(window, "Request", Request);
 	publish(window, "Response", Response);
-}
-/* ******************************************************** */
-{
-	const div = document.createElement("div");
-	div.hidden = true;
-	if (!div.hasAttribute("hidden"))
-	{
-		Object.defineProperty(
-			HTMLElement.prototype,
-			"hidden",
-			{
-				set: function (value)
-				{
-					if (value)
-					{
-						this.setAttribute("hidden", "");
-					}
-					else
-					{
-						this.removeAttribute("hidden");
-					}
-				},
-				get: function ()
-				{
-					return this.hasAttribute("hidden");
-				}
-			}
-		);
-	}
 }
 /* ******************************************************** */
 {
