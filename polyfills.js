@@ -342,6 +342,40 @@ if (window.RadioNodeList === undefined)
 
 	RadioNodeList.prototype.__proto__ = NodeList;
 
+	Object.defineProperty(
+		RadioNodeList.prototype,
+		"value",
+		{
+			get: function ()
+			{
+				let i = 0;
+				for (; i < this.length; ++i)
+				{
+					const item = this[i];
+					if (item instanceof HTMLInputElement && item.type === "radio" && item.checked)
+					{
+						return item.value;
+					}
+				}
+
+				return "";
+			},
+			set: function (value)
+			{
+				let i = 0;
+				for (; i < this.length; ++i)
+				{
+					const item = this[i];
+					if (item instanceof HTMLInputElement && item.type === "radio" && item.value === value)
+					{
+						item.checked = true;
+						return;
+					}
+				}
+			}
+		}
+	);
+
 	publish(
 		RadioNodeList.prototype,
 		"item",
