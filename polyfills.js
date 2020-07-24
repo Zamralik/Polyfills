@@ -327,7 +327,65 @@ if (NodeList.prototype.forEach === undefined)
 /* ******************************************************** */
 if (window.RadioNodeList === undefined)
 {
-	window.RadioNodeList = HTMLCollection;
+	window.RadioNodeList = function (nodes)
+	{
+		nodes.forEach(
+			function (node, index)
+			{
+				this[index] = node;
+			},
+			this
+		);
+
+		publish(this, "length", nodes.length);
+	};
+
+	RadioNodeList.prototype.__proto__ = NodeList;
+
+	publish(
+		RadioNodeList.prototype,
+		"item",
+		function (index)
+		{
+			return this[index];
+		}
+	);
+
+	publish(
+		RadioNodeList.prototype,
+		"forEach",
+		function (callback, thisArg)
+		{
+			Array.from(this).forEach(callback, thisArg);
+		}
+	);
+
+	publish(
+		RadioNodeList.prototype,
+		"keys",
+		function ()
+		{
+			return Array.from(this).keys();
+		}
+	);
+
+	publish(
+		RadioNodeList.prototype,
+		"values",
+		function ()
+		{
+			return Array.from(this).values();
+		}
+	);
+
+	publish(
+		RadioNodeList.prototype,
+		"entries",
+		function ()
+		{
+			return Array.from(this).entries();
+		}
+	);
 }
 /* ******************************************************** */
 {
@@ -356,7 +414,19 @@ if (window.RadioNodeList === undefined)
 						matches.push(this.item(i));
 					}
 				}
-				return matches.length > 1 ? matches : matches[0];
+
+				if (matches.length > 1)
+				{
+					return new RadioNodeList(matches);
+				}
+				else if (matches.length === 1)
+				{
+					return matches[0];
+				}
+				else
+				{
+					return null;
+				}
 			}
 		);
 	}
