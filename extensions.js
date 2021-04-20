@@ -45,10 +45,34 @@ publish(
 publish(
 	window,
 	"debounce_event",
-	function (target, event_type, delay, callback, options)
+	function (target, event_name, delay)
 	{
-		// Deprecated
-		target.addEventListener(event_type, debounce(delay, callback), options || false);
+		let id = 0;
+		let detail = undefined;
+		
+		function completed()
+		{
+			target.dispatchEvent(
+				new CustomEvent(
+					"debounced_" + event_name,
+					{
+						cancelable: true,
+						bubbles: true,
+						detail: detail
+					}
+				)
+			);
+		}
+	
+		target.addEventListener(
+			event_name,
+			function (event)
+			{
+				clearTimeout(id);
+				detail = (event instanceof CustomEvent) ? event.detail : undefined;
+				id = setTimeout(completed, delay === undefined ? 300 : delay);
+			}
+		);
 	}
 );
 /* ******************************************************** */
@@ -532,6 +556,7 @@ publish(
 	window,
 	"Iterator",
 	{
+		isIterable: TypeCheck.isIterable,
 		toArray: function (iterable)
 		{
 			return (iterable instanceof Array) ? iterable : Array.from(iterable);
