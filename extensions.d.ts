@@ -1,8 +1,3 @@
-interface Dictionary<T>
-{
-	[key: string]: T;
-}
-
 interface ClassConstructor<T>
 {
 	new (...args: any[]): T;
@@ -100,7 +95,7 @@ interface Geolocation
 
 interface Location
 {
-	parameters: () => Dictionary<string>;
+	parameters: () => Record<string, string>;
 }
 
 interface HTMLCollection
@@ -150,7 +145,7 @@ interface HTMLFormElement
 {
 	getEditableElements: () => Array<EditableHtmlElement>
 	getFieldNames: () => Array<string>
-	getFields: () => Dictionary<EditableHtmlElement | NodeListOf<EditableHtmlElement>>;
+	getFields: () => Record<string, EditableHtmlElement | NodeListOf<EditableHtmlElement>>;
 	clear: () => void
 }
 
