@@ -90,7 +90,7 @@ interface PromiseConstructor
 
 interface Geolocation
 {
-	askCurrentPosition: (options?: PositionOptions) => Promise<Position>;
+	askCurrentPosition: (options?: PositionOptions) => Promise<GeolocationPosition>;
 }
 
 interface Location
